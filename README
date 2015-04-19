@@ -1,0 +1,10 @@
+Hello. this is shiwoo Park
+
+First of all, thanks for using my 'date_handler' python module.
+
+This module is created for parsing and normalizing date strings to get standardized form of date data
+You can retrieve unix-timestamp or 'YYYY-mm-dd HH:MM:SS' formatted date data from it.
+Also, you can decide the output date format by using python date format (please check python documentation)
+
+If you find any error or bug, please contact me by email below
+silva23@naver.com
