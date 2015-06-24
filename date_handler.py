@@ -11,9 +11,12 @@ import re
 from datetime import datetime,timedelta
 import traceback
 
-TIME_TXT_MAX_LEN = 100 # 유입 시간 문자열의 체크 허용 최대길이.
+TIME_TXT_MAX_LEN = 100  # 유입 시간 문자열의 체크 허용 최대길이.
 DEBUG = True
 DEBUG = False
+
+DEEP_DEBUG = True
+DEEP_DEBUG = False
 
 def getListStr(l):
 	s = "["
@@ -70,11 +73,12 @@ class DateFactory:
 		# - 하위 Group이 없을 시 : found된 문자열 통째가 최종값이 됨.
 		# - 숫자값에 대해서는 zeroPadding이 반드시 필요
 
-		td = "[:]" # time Delimiter
-		dd = "[\-\.\/]" # date Delimiter
+		td = "[:]"  # time Delimiter
+		dd = "[\-\.\/]"  # date Delimiter
 
 		# 덩치가 큰 패턴
-		self.patternKVList.append( ("%y$2$%m$4$%d$6$%H$8$%M$10$%S", [".*?(\d{2})\s*("+dd+")\s*(\d{1,2})\s*("+dd+")\s*(\d{1,2})\s*("+"[\/\.]"+")\s*(\d{1,2})\s*("+td+")\s*(\d{1,2})\s*("+td+")\s*(\d{1,2}).*"]) ) # 13/02/22/15:41:12
+
+		self.patternKVList.append( ("%y$2$%m$4$%d$6$%H$8$%M$10$%S", [".*?(\d{2})\s*("+dd+")\s*(\d{1,2})\s*("+dd+")\s*(\d{1,2})\s*("+"[\/\.]"+")\s*(\d{1,2})\s*("+td+")\s*(\d{1,2})\s*("+td+")\s*(\d{1,2}).*"]) )  # 13/02/22/15:41:12
 		self.patternKVList.append( ("%Y$2$%m$4$%d$6$%H$8$%M$10$%S", [".*?(\d{4})\s*("+dd+")\s*(\d{1,2})\s*("+dd+")\s*(\d{1,2})(\s*)(\d{1,2})\s*("+td+")\s*(\d{1,2})\s*("+td+")\s*(\d{1,2}).*"]) ) # 2013/02/22 15:41:12
 		self.patternKVList.append( ("%Y$2$%m$4$%d$6$%H$8$%M$10$%S$12$", [".*?(\d{4})\s*(년)\s*(\d{1,2})\s*(월)\s*(\d{1,2})\s*(일)\s*(\d{1,2})\s*(시)\s*(\d{1,2})\s*(분)\s*(\d{1,2})\s*(초).*"]) ) # 2015년03월11일 01시19분25초
 		self.patternKVList.append( ("%Y$2$%m$4$%d$6$%H$8$%M$10$", [".*?(\d{4})\s*(년)\s*(\d{1,2})\s*(월)\s*(\d{1,2})\s*(일)\s*(\d{1,2})\s*(시)\s*(\d{1,2})\s*(분).*"]) ) # 2015년03월11일 01시19분
@@ -84,14 +88,18 @@ class DateFactory:
 		self.patternKVList.append( ("%m$2$%d$4$%Y", [".*?(\d{1,2})\s*("+dd+")\s*(\d{1,2})\s*("+dd+")\s*(\d{4}).*"]) )
 		self.patternKVList.append( ("%x", [".*\d{2}/\d{2}/\d{2}", "\d{2}/\d{2}/\d{4}", "\d{2}\.\d{2}\.\d{4}.*"]) )
 		self.patternKVList.append( ("%y$2$%m$4$%d", [".*?(\d{2})\s*("+dd+")\s*(\d{1,2})\s*("+dd+")\s*(\d{1,2}).*"]) )
+		self.patternKVList.append( ("%m$2$%d", ["(\d{1,2})\s*("+dd+")\s*(\d{1,2})"+dd+"?"]) )
 		self.patternKVList.append( ("%H$2$%M$4$%S$6$", [".*?(\d{1,2})\s*(시)\s*(\d{1,2})\s*(분)\s*(\d{1,2})\s*(초).*"]) )
-		self.patternKVList.append( ("%H$2$%M$4$%S", [".*?(\d{1,2})\s*("+td+")\s*(\d{1,2})\s*("+td+")\s*(\d{1,2}).*"]) )
+		self.patternKVList.append( ("%H$2$%M$4$%S", [".*?\D(\d{1,2})\s*("+td+")\s*(\d{1,2})\s*("+td+")\s*(\d{1,2}).*"]) )
+		self.patternKVList.append( ("%H$2$%M$4$%S", ["\s*?(\d{1,2})\s*("+td+")\s*(\d{1,2})\s*("+td+")\s*(\d{1,2}).*"]) )
 		self.patternKVList.append( ("%H$2$%M", ["(\d{1,2})\s*("+td+")\s*(\d{1,2})"]) )
 		self.patternKVList.append( ("%Y%m%d", ["\d{8}"]) )
+		self.patternKVList.append( ("%Y:%m:%d", ["\d{4}:\d{1,2}:\d{1,2}"]) )  # 2006:09:05
 		self.patternKVList.append( ("%Y%m%d", ["어제|yesterday|엊그제|그저께|그제"]) )
 
 		# 덩치가 작은 패턴
 		self.patternKVList.append( ("%Y", ["^\s*(\d{4})\s*년\s*$"]) )  # 2014년
+		self.patternKVList.append( ("%Y", ["^\s*(\d{4})\s*"+dd+"\s*$"]) )  # 2014년
 		self.patternKVList.append( ("%m", ["^\s*(\d{1,2})\s*월\s*$"]) )  # 3월, 12월
 		self.patternKVList.append( ("%d", ["^\s*(\d{1,2})\s*일\s*$"]) )  # 2일, 11일
 		self.patternKVList.append( ("%H", ["^\s*(\d{1,2})\s*시\s*$"]) )  # 2시, 11시
@@ -99,7 +107,7 @@ class DateFactory:
 		self.patternKVList.append( ("%S", ["^\s*(\d{1,2})\s*초\s*$"]) )  # 2초, 51초
 		self.patternKVList.append( ("%z", ["[+-]\d{4}","([+-]\d{2}):(\d{2})"]) ) # UTC offset(+|-HHMM) = +0000, -1030, +09:00
 		self.patternKVList.append( ("%Y", ["^\s*(\d{4})\s*$"]) )# 2014
-		self.patternKVList.append( ("%d;%m;%Y;%H;%M;%S", ["^\s*(\d{1,2})\s*$"]) )# 2014, 2014년
+		self.patternKVList.append( ("%d;%m;%y;%H;%M;%S", ["^\s*(\d{1,2})\s*$"]) )# 두글자 숫자
 
 		self.agoPatternList.append( ("%m", [".*?(\d+)\s*(개월|달|months|month)\s*(ago|전).*"]) )
 		self.agoPatternList.append( ("%w", [".*?(\d+)\s*(주|주일|weeks|week)\s*(ago|전).*"]) )
@@ -189,19 +197,26 @@ class DateFactory:
 		now = time.localtime()
 		for dateFormat, dateStr in dateFormatList:
 
-			if DEBUG:
-				print ("DATESTR : %s / FORMAT : %s"%(dateStr, dateFormat))
+			if DEBUG and not DEEP_DEBUG:
+				print ("		DATESTR : %s / FORMAT : %s"%(dateStr, dateFormat))
 
 			if dateFormat == "###" and dateStr == "###": # List1(패턴체크) 검사
 				ptChkFinished = True
 				continue
 
 			try:
-				if dateFormat in ["%d", "%H", "%M", "%S"]:  # 부정확한 단일데이터가 올경우 pass
+				if dateFormat in ["%m", "%B", "%d", "%H", "%M", "%S"]:  # 부정확한 단일데이터가 올경우 pass
 					continue
+				if ("%Y" not in dateFormat) and ("%y" not in dateFormat):
+					if ("%B" in dateFormat) or ("%m" in dateFormat) or ("%d" in dateFormat):
+						continue
+				if ("%B" not in dateFormat) and ("%m" not in dateFormat):
+					if "%d" in dateFormat:
+						continue
 				if "%p" in dateFormat:  # AM,PM 있을 시 시간값수정
 					dateFormat = dateFormat.replace("%H", "%I")
 
+				#print "KKKKKKKK %s // %s"%(dateStr, dateFormat)
 				timeObj = time.strptime(dateStr, dateFormat)
 				if (timeObj.tm_year == 1900) and (timeObj.tm_mon == 1) and (timeObj.tm_mday == 1):
 					dateStr = "%s-%s-%s %s:%s:%s"%(now.tm_year, now.tm_mon, now.tm_mday, timeObj.tm_hour, timeObj.tm_min, timeObj.tm_sec)
@@ -239,13 +254,16 @@ class DateFactory:
 		originalString = date_str
 
 		# 순수히 정규표현식 패턴만으로 포맷 추출 시도
+		if DEBUG:
+			print "========== EXTRACT STEP 1 =========="
 		list1 = self.getFormatList([date_str])
 		ret1 = self.getPatternMatchingResult(list1)
 
+		if DEBUG:
+			print "========== EXTRACT STEP 2 =========="
+		# Lv.1 Normalize 이후 포맷 추출 시도
 		original_date_str = date_str
 		normalized_token_list = self.normalize(date_str)
-
-		# Lv.1 Normalize 이후 포맷 추출 시도
 		list2 = self.getFormatList(normalized_token_list)
 		ret2 = self.getPatternMatchingResult(list2)
 
@@ -253,6 +271,8 @@ class DateFactory:
 
 		# Lv.2 Normalize 이후 포맷 추출 시도
 		if (ret_timestamp == 0) or (len(ret_format) == 2):
+			if DEBUG:
+				print "========== EXTRACT STEP 3 =========="
 			normalizedTokenListByLV2 = self.normalize(original_date_str, level=2)
 			list3 = self.getFormatList(normalizedTokenListByLV2)
 			ret3 = self.getPatternMatchingResult(list3)
@@ -353,11 +373,11 @@ class DateFactory:
 				afterTxtList = self.reserveDic[dFormat]
 
 				for idx in range(0, size):  # 각 매칭 String에 대해
-					subList = textList[idx].split(";")
+					subList = textList[idx].split(";")  # October;Oct;10월
 					afterTxt = afterTxtList[idx]
 
 					for beforeTxt in subList:
-						if beforeTxt in word:
+						if beforeTxt == word:
 							word = word.replace(beforeTxt, afterTxt)
 							matched = True
 							break
@@ -385,40 +405,53 @@ class DateFactory:
 		# 각 토큰에 대한 Format 후보 List를 모은다 (모든 경우의 수 Collect)
 		candiList = []
 		for token in normalizedTokenList:
-			setList = self.getPossibleFormatSetList(token)  # [ (dateformat, string), .... ]
-			if setList:
+			possibleFormatSetList = self.getPossibleFormatSetList(token)  # [ (dateformat, string), .... ]
+			if possibleFormatSetList:
 				if len(candiList) == 0:  # 첫번째 토큰일때
-					for setFormat, setStr in setList:
-						for f in setFormat.split(";"):
-							candiList.append((f,setStr))
+					for promisingDateFormats, promisingDateStr in possibleFormatSetList:
+						promisingDateFormatList = promisingDateFormats.split(";")
+						for promisingDateFormat in promisingDateFormatList:
+							candiList.append((promisingDateFormat, promisingDateStr))
 				else:  # 두번째 이후 토큰 처리
-					newCandiList = list()
+					newCandiList = list(candiList)
 					for candiFormat, candiStr in candiList:
-						for setFormat, setStr in setList:
-							for f in setFormat.split(";"):
-								#print "SET : ",f ,setStr
+						for promisingDateFormats, promisingDateStr in possibleFormatSetList:
+							# 하나의 정규표현식에 여러 date format이 매칭되는 경우 발생 가능
+							# (ex. %d;%m;%y;%H;%M;%S, 한자리 혹은 두자리 숫자)
+							promisingDateFormatList = promisingDateFormats.split(";")
+							for promisingDateFormat in promisingDateFormatList:
 								# Format String 연결 규칙 설정
 								# - 년도 데이터 : %Y, %y
 								# - 월 데이터 : %m, %B(%b 포함)
 								# - 날짜데이터 > 시간데이터
 								# - 같은 포맷 반복 불가
-								if f == "%Y" and "%y" in candiFormat:
+								if promisingDateFormat in candiFormat:
 									continue
-								if f == "%Y" and "%y" in candiFormat:
+								if (promisingDateFormat == "%Y"):
+									if ("%y" in candiFormat) or len(promisingDateStr) != 4:
+										continue
+								if (promisingDateFormat == "%y") and ("%Y" in candiFormat):
 									continue
-								if f == "%m" and "%B" in candiFormat:
+								if (promisingDateFormat == "%m") and ("%B" in candiFormat):
 									continue
-								if f == "%B" and "%m" in candiFormat:
+								if (promisingDateFormat == "%B") and ("%m" in candiFormat):
 									continue
-								if f in ["%H","%M","%S"]:  # 시간데이터가 날짜데이터보다 우선할수 없음
+								if ("%H" in promisingDateFormat) and ("%H" in candiFormat):
+									continue
+								if promisingDateFormat in ["%H", "%M", "%S"]:  # 시간데이터가 날짜데이터보다 우선할수 없음
 									if "%d" not in candiFormat:
 										continue
-									if ("%m" not in candiFormat) and ("%B" not in candiFormat) :
+									elif ("%m" not in candiFormat) and ("%B" not in candiFormat):
 										continue
-								if f not in candiFormat :
-									newCandiList.append( (candiFormat+" "+f, candiStr+" "+setStr) )
-								#print ("NEW CANDI : "+str(newCandiList))
+
+								if promisingDateFormat not in candiFormat:
+									newCandiList.append( (candiFormat+" "+promisingDateFormat, candiStr+" "+promisingDateStr) )
+
 					candiList = newCandiList
+
+			if DEEP_DEBUG:
+				print "			TOKEN : %s, CANDI_LIST : %s"%(token, getListStr(candiList))
+
 		if DEBUG:
 			print ("getFormatList()\n	INPUT LIST : %s\n	CANDIDATE LIST : %s"%(getListStr(normalizedTokenList), getListStr(candiList)) )
 
@@ -427,21 +460,25 @@ class DateFactory:
 	# 전체 String 형성을 위한 DateFormat 경우의 수를 만든다.
 
 
-	def getPossibleFormatSetList(self, s):  # 3월 > March
+	def getPossibleFormatSetList(self, token):  # 3월 > March
 		""" s : 최소단위 구분 문자열
 		    return : 대입 가능 date format string LIST
 		"""
-		if len(s.strip()) == 0:
+		if len(token.strip()) == 0:
 			return None
 
 		# 패턴 매칭
 		ret = []
+		if DEEP_DEBUG:
+			print "	getPossibleFormatSetList(%s)"%token
 		for dFormat, ptList in self.patternKVList:
 			matched = False
 
 			for pt in ptList:
-				m = re.match(pt, s)
+				m = re.match(pt, token)
 				if m:
+					if DEEP_DEBUG:
+						print "		matched : %s | %s"%(dFormat, pt)
 					matched = True
 					if dFormat in ["%z"]:  # 토큰으로 고려하지 않을 dateFormat
 						break
@@ -463,6 +500,8 @@ class DateFactory:
 							targetDate = datetime.now() - timedelta(days=2)
 							newStr = targetDate.strftime("%Y%m%d")
 					ret.append((dFormat, newStr))
+					if DEEP_DEBUG:
+						print "		CANDI APPEND : %s | %s"%(dFormat, newStr)
 					break
 				#if matched :
 				#	break
@@ -470,10 +509,14 @@ class DateFactory:
 		# 예약어 매칭
 		for dFormat, txtList in self.reserveDic.items():
 			for text in txtList:
-				if text == s:
+				if text == token:
 					ret.append( (dFormat, text) )
+					if DEEP_DEBUG:
+						print "		CANDI APPEND : %s | %s"%(dFormat, text)
 
-		#print ("TOKEN : "+s+" : "+str(ret) )
+		if DEEP_DEBUG:
+			print ("		CANDI LIST : %s"%(getListStr(ret)))
+
 		return ret
 
 
@@ -490,62 +533,78 @@ class DateFactory:
 	def getDateByStamp(self, timestamp, dateFormat=None):
 		if dateFormat:
 			return time.strftime(dateFormat, time.localtime(int(timestamp)))
-		else :
+		else:
 			return time.strftime(self.defaultFormat, time.localtime(int(timestamp)))
 
 if __name__ == "__main__":
-	from resource_date import TIME_AGODATA, TIME_DATEDATA
+	from resource_date import TIME_AGODATA, TIME_DATEDATA, ASSERT_TIME_DATEDATA
 	set_err = """
 	"""
 
 
 	set1 = """
-	2015/1/15 13:30"
+	2000:06:24 [01:08:41]
+	입력: 2012년 01월 01일 22:03:53 | 수정: 2012년 01월 01일 22:04:00
+	김주현 | 2011:06:24 [08:41]
+	Dec 2, 2014
 	September 11, 2014 at 6:41 pm
-	2014년 12월 1일
-	<무카스미디어 = 정길수 수습기자> (2015-03-17 오후 6:35)
-	ten minutes ago
-	19 분 전
-	2015. 04.05(일) 19:32
-	2015. 04.16. 18:49
-	입력시간 : 2015. 04.16. 18:49
-	Mon 03 Feb 2014 19:01:00 -0500
-	14시36분00초 | 배선영 기자
-	2015-04-21 14시36분00초 | 배선영 기자
-	2015년04월21일
-	<무카스미디어 = 정길수 수습기자> (2015-03-17 오후 6:35)
-	입력 : 2015-04-22 오후 3:00:40
-	그저께 오후 6:27
-	어제 오후 6:27
-	어제
-	엊그제
 	"""
 
+
 	set2 = """
-	June 18.2015
+	2015. 04.05(일) 9:32 PM
 	"""
 
 	dFac = DateFactory()
 	#testData = set_err
-	testData = TIME_AGODATA
-	testData = set1
 	testData = set2
 	testData = TIME_DATEDATA
+	testData = set1
+	testData = ASSERT_TIME_DATEDATA
+	testData = TIME_AGODATA
 	#print testData
 
-	for timeTxt in testData.split("\n"):
-		if timeTxt is None:
-			continue
-		timeTxt = timeTxt.strip()
-		if len(timeTxt) == 0:
-			continue
-		if DEBUG:
-			print "@@@ INPUT STRING : %s @@@"%timeTxt
-		unixTxt = dFac.getUnixTimestamp(timeTxt)
-		print ""
-		dateTxt = dFac.getDate(timeTxt)
-		print "#################################"
-		print " INPUT STRING : ", timeTxt
-		print " UNIX TIMESTAMP : ", unixTxt
-		print " DEFAULT DATE : ", dateTxt
-		print "#################################"
+	ASSERT_MODE = ""
+
+	if ASSERT_MODE:
+		error_count = 0
+		for line in testData.split("\n"):
+			if line is None:
+				continue
+			line = line.strip()
+			if len(line) == 0:
+				continue
+			tmpList = line.split("	")
+			timeTxt = tmpList[0]
+			outputTimeTxt = dFac.getDate(timeTxt)
+			answerTimeTxt = tmpList[1]
+			try:
+				assert outputTimeTxt == answerTimeTxt
+			except:
+				error_count += 1
+				print "INPUT STRING :	%s"%timeTxt
+				print "OUTPUT STRING :	%s"%outputTimeTxt
+				print "ANSWER STRING :	%s\n"%answerTimeTxt
+		print "CHECK FINISHED : %s ERRORS"%error_count
+
+	else:
+		for timeTxt in testData.split("\n"):
+			if timeTxt is None:
+				continue
+			timeTxt = timeTxt.strip()
+			if len(timeTxt) == 0:
+				continue
+			dateTxt = dFac.getDate(timeTxt)
+
+			#print "%s	%s"%(timeTxt, dateTxt)
+
+			#"""
+			if DEBUG:
+				print "@@@ INPUT STRING : %s @@@"%timeTxt
+			unixTxt = dFac.getUnixTimestamp(timeTxt)
+			print ""
+			dateTxt = dFac.getDateByStamp(unixTxt)
+			print "#################################"
+			print "	%s\n	%s (%s)"%(timeTxt, dateTxt, unixTxt)
+			print "#################################"
+			#"""
