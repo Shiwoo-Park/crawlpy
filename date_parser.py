@@ -1,11 +1,13 @@
 #/usr/bin/env python
-# coding: utf8
+# coding: utf-8
+
 """
 NORMALIZE ALL KINDs OF DATE FORMAT
 
 Made by. shiwoo park 2015
 silva23@naver.com
 """
+
 import time
 import re
 from datetime import datetime,timedelta
