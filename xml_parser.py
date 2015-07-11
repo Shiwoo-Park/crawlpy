@@ -213,7 +213,7 @@ class XmlParser:
 				ret_set.add(link_text)
 		return ret_set
 
-class RssParser(XmlParser):
+class FeedParser(XmlParser):
 	"""
 	RSS FEED만 전문적으로 파싱하기 위한 파서
 	필드를 제한한것 이외에는 XmlParser와 특별한 차이점이 없음
@@ -266,7 +266,7 @@ class RssParser(XmlParser):
 		self.rss_field_match_dic = {"webmaster":"webMaster"}
 
 	def getChannelData(self):
-		ch_data = RssParser.getChannelData(self)
+		ch_data = FeedParser.getChannelData(self)
 
 		# 전체 정규 필드값 채우기
 		all_fields = self.rss_required_fields + self.rss_optional_fields

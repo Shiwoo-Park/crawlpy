@@ -1,8 +1,8 @@
 # coding:utf8
-from xml_parser import RssParser, downloadPage, getDicStr, getListStr
+from xml_parser import FeedParser, downloadPage, getDicStr, getListStr
 
 
-class BlogRssParser(RssParser):
+class BlogFeedParser(FeedParser):
 	"""
 	각종 블로그의 RSS를 파싱하여 동일한 형태의 데이터로 제공하는 모듈
 
@@ -12,7 +12,7 @@ class BlogRssParser(RssParser):
 	others = ["image"]
 	"""
 	def __init__(self, xml_content=""):
-		RssParser.__init__(self, xml_content)
+		FeedParser.__init__(self, xml_content)
 		self.channel_score = -1
 		self.initGeneratorMatchDic()
 
@@ -57,7 +57,7 @@ class BlogRssParser(RssParser):
 		return ""
 
 	def getChannelData(self):
-		ch_data = RssParser.getChannelData(self)
+		ch_data = FeedParser.getChannelData(self)
 		ch_data["generator"] = self.getGenerator(ch_data["generator"].lower())
 		return ch_data
 
@@ -91,7 +91,7 @@ http://www.lifeformula.net/rss.xml
 	save_path = "C:\Users\jsilva\Desktop\Temp\[SC] blog\\rss\parse_result.txt"
 	file = open(save_path, mode="a")
 	urls = rss_links.split("\n")
-	xml_parser = BlogRssParser()
+	xml_parser = BlogFeedParser()
 
 	for url in urls:
 		url = url.strip()
