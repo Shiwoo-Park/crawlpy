@@ -10,7 +10,7 @@ Give it a try!!!
 #### date_parser.py
 
 Normalize diverse type of date strings and be able to produce into type what you want.
-It supports 한국어 날짜포맷, English date formats and ago pattern formats(~~ 전)
+It supports Korean date formats, English date formats and *ago pattern* formats(ex. 5 min ago)
 Here's how to use.
 
 ```python
