@@ -81,8 +81,8 @@ class DateParser:
 
 		# 덩치가 큰 패턴
 
-		self.pattern_kvlist.append( ("%y$2$%m$4$%d$6$%H$8$%M$10$%S", [".*?(\d{2})\s*("+dd+")\s*(\d{1,2})\s*("+dd+")\s*(\d{1,2})\s*("+"[\/\.]"+")\s*(\d{1,2})\s*("+td+")\s*(\d{1,2})\s*("+td+")\s*(\d{1,2}).*"]) )  # 13/02/22/15:41:12
-		self.pattern_kvlist.append( ("%Y$2$%m$4$%d$6$%H$8$%M$10$%S", [".*?(\d{4})\s*("+dd+")\s*(\d{1,2})\s*("+dd+")\s*(\d{1,2})(\s*)(\d{1,2})\s*("+td+")\s*(\d{1,2})\s*("+td+")\s*(\d{1,2}).*"]) ) # 2013/02/22 15:41:12
+		self.pattern_kvlist.append( ("%y$2$%m$4$%d$6$%H$8$%M$10$%S", [".*?(\d{2})\s*("+dd+")\s*(\d{1,2})\s*("+dd+")\s*(\d{1,2})(\D+)(\d{1,2})\s*("+td+")\s*(\d{1,2})\s*("+td+")\s*(\d{1,2}).*"]) )  # 13/02/22/15:41:12
+		self.pattern_kvlist.append( ("%Y$2$%m$4$%d$6$%H$8$%M$10$%S", [".*?(\d{4})\s*("+dd+")\s*(\d{1,2})\s*("+dd+")\s*(\d{1,2})(\D+)(\d{1,2})\s*("+td+")\s*(\d{1,2})\s*("+td+")\s*(\d{1,2}).*"]) ) # 2013/02/22 15:41:12
 		self.pattern_kvlist.append( ("%Y$2$%m$4$%d$6$%H$8$%M$10$%S$12$", [".*?(\d{4})\s*(년)\s*(\d{1,2})\s*(월)\s*(\d{1,2})\s*(일)\s*(\d{1,2})\s*(시)\s*(\d{1,2})\s*(분)\s*(\d{1,2})\s*(초).*"]) ) # 2015년03월11일 01시19분25초
 		self.pattern_kvlist.append( ("%Y$2$%m$4$%d$6$%H$8$%M$10$", [".*?(\d{4})\s*(년)\s*(\d{1,2})\s*(월)\s*(\d{1,2})\s*(일)\s*(\d{1,2})\s*(시)\s*(\d{1,2})\s*(분).*"]) ) # 2015년03월11일 01시19분
 		self.pattern_kvlist.append( ("%Y$2$%m$4$%d$6$%H$8$%M", [".*?(\d{4})\s*("+dd+")\s*(\d{1,2})\s*("+dd+")\s*(\d{1,2})(\D*)(\d{1,2})\s*("+td+")\s*(\d{1,2}).*"]) ) # 2013/02/22 15:41
@@ -539,54 +539,49 @@ if __name__ == "__main__":
 	set_err = """
 	"""
 
-	dFac = DateParser()
+	d_parser = DateParser()
 
 	ASSERT_MODE = "y"
 
 	if ASSERT_MODE:
-		testData = ASSERT_TIME_DATEDATA
+		test_data = ASSERT_TIME_DATEDATA
 		error_count = 0
-		for line in testData.split("\n"):
+		for line in test_data.split("\n"):
 			if line is None:
 				continue
 			line = line.strip()
 			if len(line) == 0:
 				continue
 			tmpList = line.split("	")
-			timeTxt = tmpList[0]
-			outputTimeTxt = dFac.getDate(timeTxt)
+			time_txt = tmpList[0]
+			outputTimeTxt = d_parser.getDate(time_txt)
 			answerTimeTxt = tmpList[1]
 			try:
 				assert outputTimeTxt == answerTimeTxt
 			except:
 				error_count += 1
-				print "INPUT STRING :	%s"%timeTxt
+				print "INPUT STRING :	%s"%time_txt
 				print "OUTPUT STRING :	%s"%outputTimeTxt
 				print "ANSWER STRING :	%s\n"%answerTimeTxt
 		print "CHECK FINISHED : %s ERRORS"%error_count
 
 	else:
-		testData = TIME_AGODATA
-		testData = TIME_DATEDATA
-		testData = set_err
+		test_data = TIME_AGODATA
+		test_data = TIME_DATEDATA
+		test_data = set_err
 
-		for timeTxt in testData.split("\n"):
-			if timeTxt is None:
+		for time_txt in test_data.split("\n"):
+			if time_txt is None:
 				continue
-			timeTxt = timeTxt.strip()
-			if len(timeTxt) == 0:
+			time_txt = time_txt.strip()
+			if len(time_txt) == 0:
 				continue
-			dateTxt = dFac.getDate(timeTxt)
-
-			#print "%s	%s"%(timeTxt, dateTxt)
-
-			#"""
 			if DEBUG:
-				print "@@@ INPUT STRING : %s @@@"%timeTxt
-			unixTxt = dFac.getUnixTimestamp(timeTxt)
+				print "@@@ INPUT STRING : %s @@@"%time_txt
+			timestamp = d_parser.getUnixTimestamp(time_txt)
 			print ""
-			dateTxt = dFac.getDateByStamp(unixTxt)
+			date_txt = d_parser.getDateByStamp(timestamp)
 			print "#################################"
-			print "	%s\n	%s (%s)"%(timeTxt, dateTxt, unixTxt)
+			print "	%s\n	%s (%s)"%(time_txt, date_txt, timestamp)
 			print "#################################"
 			#"""
