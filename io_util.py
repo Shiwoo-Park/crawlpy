@@ -16,3 +16,6 @@ def readFileAsList(path):
 	lines = f.readlines()
 	f.close()
 	return lines
+
+if __name__ == "__main__":
+	pass

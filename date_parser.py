@@ -540,14 +540,11 @@ if __name__ == "__main__":
 	"""
 
 	dFac = DateParser()
-	testData = TIME_AGODATA
-	testData = TIME_DATEDATA
-	testData = ASSERT_TIME_DATEDATA
-	#testData = set_err
 
 	ASSERT_MODE = "y"
 
 	if ASSERT_MODE:
+		testData = ASSERT_TIME_DATEDATA
 		error_count = 0
 		for line in testData.split("\n"):
 			if line is None:
@@ -569,6 +566,10 @@ if __name__ == "__main__":
 		print "CHECK FINISHED : %s ERRORS"%error_count
 
 	else:
+		testData = TIME_AGODATA
+		testData = TIME_DATEDATA
+		testData = set_err
+
 		for timeTxt in testData.split("\n"):
 			if timeTxt is None:
 				continue

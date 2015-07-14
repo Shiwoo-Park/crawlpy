@@ -8,46 +8,6 @@ from xml.etree.ElementTree import fromstring
 
 DEBUG = False
 
-# =================== HTTP 관련 ===================
-def downloadPage(url, _userAgent="zumbot", retry=1):
-	"""
-	:param url: 방문 URL
-	:param _userAgent: zumbot | browswer | mobile | wget
-	:param retry: 회수 지정
-	:return: dictionary (key별 데이터 포함)
-	- header : 반환 header (에러일시 에러 msg)
-	- content : 반환 html (에러일시 에러 스택정보)
-	- url : 반환 url (에러일시 없음)
-	- code : 반환 httpcode (에러일시 None)
-	"""
-	url = urllib2.quote(url, safe=":/?#[]@!$&'()*+,;=\\%~")
-	opener = urllib2.build_opener(urllib2.HTTPRedirectHandler(), urllib2.HTTPCookieProcessor())
-	request = urllib2.Request(url)
-	# default userAgent == "zumbot"
-	userAgent = "Mozilla/5.0 (Windows NT 6.1; ZumBot/1.0; http://help.zum.com/;WOW64;Trident/7.0;rv:11.0) like Gecko"
-	if _userAgent == "browser":
-		userAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.76 Safari/537.36"
-	elif _userAgent == "mobile":
-		userAgent = "Mozilla/5.0 (Linux; U; Android 4.0.3; ko-kr; LG-L160L Build/IML74K) AppleWebkit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30"
-	elif _userAgent == "wget":
-		userAgent = "wget"
-
-	request.add_header("User-agent", userAgent)
-	ret = dict()
-	for i in range(retry+1):
-		try:
-			response = opener.open(request)
-			ret["header"] = str(response.info())
-			ret["content"] = response.read()
-			ret["url"] = response.url
-			ret["code"] = response.code
-		except Exception, msg:
-			ret["header"] = str(msg)
-			ret["content"] = traceback.format_exc()
-			ret["code"] = None
-
-	return ret
-
 # DEBUG Functions
 def describeNode(node):
 	print "TAG:%s / DATA:%s / ATTR:%s"%(node.tag, node.text, node.attrib)
@@ -285,29 +245,27 @@ class FeedParser(XmlParser):
 		return ch_data
 
 
-if __name__:
-	pass
-	#from common_util import downloadPage
+if __name__ == "__main__":
+	from http_client import downloadPage
 
-	# url = "http://www.windycitymom.org/feeds/posts/default?alt=rss"
-	# downData = downloadPage(url)
-	# xml_parser = XmlParser(downData["content"])
-	# printDic(xml_parser.getChannelData())
+	url = "http://www.windycitymom.org/feeds/posts/default?alt=rss"
+	downData = downloadPage(url)
+	xml_parser = XmlParser(downData["content"])
+	printDic(xml_parser.getChannelData())
 
-	#xml_parser.getAllNodeByTraverse("link")
-	#nodes = xml_parser.getAllNodeByTraverse("item")
-	# for node in nodes:
-	# 	d = xml_parser.getChildrenDataAsDic(node)
-	# 	print d.keys()
-	#xml_parser.getLinksByRegex()
-	# dic_list = xml_parser.getItemDic(["channel","item"])
-	# print "%s Documents Detected"%len(dic_list)
-	# for item in dic_list[5].items():
-	# 	print "%s:%s"%item
+	xml_parser.getAllNodeByTraverse("link")
+	nodes = xml_parser.getAllNodeByTraverse("item")
+	for node in nodes:
+		d = xml_parser.getChildrenDataAsDic(node)
+		print d.keys()
+	xml_parser.getLinksByRegex()
+	dic_list = xml_parser.getItemDic(["channel","item"])
+	print "%s Documents Detected"%len(dic_list)
+	for item in dic_list[5].items():
+		print "%s:%s"%item
 
-	# r = "<\s*a>([^<>]+)<\s*/\s*a\s*>"
-	# s = "<a>hello</a>"
-	# m = re.match(r, s)
-	# if m:
-	# 	print "MATCHED!"
-	#print m.pop()
+	r = "<\s*a>([^<>]+)<\s*/\s*a\s*>"
+	s = "<a>hello</a>"
+	m = re.match(r, s)
+	if m:
+		print "MATCHED!"

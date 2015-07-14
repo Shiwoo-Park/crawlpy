@@ -115,6 +115,10 @@ class HtmlChecker:
 						break
 
 	def check(self, html):
+		"""
+		:param html: html to check
+		:return: HtmlData object, if html is empty, return None
+		"""
 		if html:
 			self.html_data = HtmlData(html)
 			self.__check_html()

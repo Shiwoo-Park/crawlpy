@@ -13,3 +13,7 @@ def guessEncoding(s, encodings=()):
 		except:
 			continue
 	return ""
+
+
+if __name__ == "__main__":
+	pass
