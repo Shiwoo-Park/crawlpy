@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#coding: utf8
+# -*- coding: utf-8 -*-
 
 import re
 from urlparse import urlparse
@@ -551,7 +551,7 @@ if __name__ == '__main__':
 	targetUrl = "http://blog.naver.com/ishine75/220152159716"
 	targetUrl = "http://blog.naver.com/PostView.nhn?blogId=ishine75&logNo=220152159716&redirect=Dlog&widgetTypeCall=true"
 
-	testHtml = readFile("D:\logs\\test.html")
+	#testHtml = readFile("D:\logs\\test.html")
 
 	# DOWNLOAD AND PARSE
 	if True:
@@ -573,7 +573,7 @@ if __name__ == '__main__':
 		parser.parse("http://test.com", testHtml)
 
 	# SET FILE OUTPUT
-	savepath = "D:\logs\\tree.out"
+	savepath = "C:\Users\jsilva\PycharmProjects\html_parse_out.txt"
 	saveIntoFile(parser.treeText, savepath)
 
 	# RESULT: BASIC INFO

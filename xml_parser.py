@@ -5,28 +5,13 @@ import re
 import traceback
 import urllib2
 from xml.etree.ElementTree import fromstring
+from str_util import getDicStr, printDic, getListStr
 
 DEBUG = False
 
 # DEBUG Functions
 def describeNode(node):
 	print "TAG:%s / DATA:%s / ATTR:%s"%(node.tag, node.text, node.attrib)
-
-def printDic(d):
-	for item in d.items():
-		print "%s:%s"%item
-
-def getDicStr(d):
-	s = ""
-	for item in d.items():
-		s += "%s:%s\n"%item
-	return s
-
-def getListStr(l):
-	s = ""
-	for e in l:
-		s += "%s\n"%e
-	return s
 
 # MAIN MODULE
 class XmlParser:
@@ -91,7 +76,21 @@ class XmlParser:
 
 		return ret_list
 
-	def getChildrenDataAsDic(self, node):
+	def getTextRecursive(self, node, delim=" "):
+		text_list = []
+		if node.text:
+			text_list.append(node.text)
+		for child in node:
+			self.__getTextRecursive(child, text_list)
+		return delim.join(text_list)
+
+	def __getTextRecursive(self, node, text_list):
+		if node.text:
+			text_list.append(node.text)
+		for child in node:
+			self.__getTextRecursive(child, text_list)
+
+	def getChildrenDataAsDic(self, node, is_recursive=False):
 		"""
 		:param node: 자식노드의 데이터를 얻고자 하는 노드
 		:return: 해당 노드의 Children 의 Tag와 Data를 Key, Value 형태로 된 Dic으로 반환
@@ -99,14 +98,18 @@ class XmlParser:
 		ret_dic = dict()
 		for child in node:
 			tag_name = child.tag
-			#tag_name = child.tag.lower()  # 무조건 모든 태그명은 lowercase로 바꾼다.
+
+			data = child.text
+			if is_recursive:
+				data = self.getTextRecursive(child)
+
 			if tag_name in ret_dic:
-				ret_dic[child.tag] += ";%s"%child.text
+				ret_dic[child.tag] += ";%s"%data
 			else:
-				ret_dic[child.tag] = "%s"%child.text
+				ret_dic[child.tag] = "%s"%data
 		return ret_dic
 
-	def getItemDic(self, path_tags=()):
+	def getItemDic(self, path_tags=(), is_recursive=False):
 		"""
 		:param path_tags: 특정 태그노드를 찾기위해 Root 부터 순차적으로 방문해야하는 tag list
 		:return: 목적 태그노드의 모든 자식노드 데이터 Dictionary (key:tag, value:text)
@@ -121,7 +124,7 @@ class XmlParser:
 
 		ret_dic = dict()
 		if now_node.tag == last_tag:
-			ret_dic = self.getChildrenDataAsDic(now_node)
+			ret_dic = self.getChildrenDataAsDic(now_node, is_recursive)
 
 		return ret_dic
 
@@ -249,6 +252,7 @@ if __name__ == "__main__":
 	from http_client import downloadPage
 
 	url = "http://www.windycitymom.org/feeds/posts/default?alt=rss"
+	url = "http://serviceapi.nmv.naver.com/flash/videoInfo.nhn?vid=6609703DDBE52161ACBA985614D63D9D88FC&inKey=V121402ebe5d1e8e9a5f3693fc12a4e395eb3ec59c431cf1d01805c0e8209b1141cb5693fc12a4e395eb3"
 	downData = downloadPage(url)
 	xml_parser = XmlParser(downData["content"])
 	printDic(xml_parser.getChannelData())
