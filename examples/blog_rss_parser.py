@@ -1,5 +1,5 @@
 # coding:utf8
-from xml_parser import FeedParser, downloadPage, getDicStr, getListStr
+from crawl_utils.xml_parser import FeedParser, downloadPage, getDicStr, getListStr
 
 
 class BlogFeedParser(FeedParser):
@@ -41,10 +41,10 @@ class BlogFeedParser(FeedParser):
 			return self.channel_score
 		self.channel_score = 0
 		ch_data = self.getChannelData()
-		for rf in self.rss_required_fields:
+		for rf in self.feed_required_fields:
 			if ch_data[rf]:
 				self.channel_score += 2
-		for of in self.rss_optional_fields:
+		for of in self.feed_optional_fields:
 			if ch_data[of]:
 				self.channel_score += 1
 		return self.channel_score

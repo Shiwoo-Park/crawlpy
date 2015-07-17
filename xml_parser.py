@@ -224,15 +224,15 @@ class FeedParser(XmlParser):
 	"""
 	def __init__(self, xml_content=""):
 		XmlParser.__init__(self, xml_content)
-		self.rss_required_fields = ["title", "link", "description"]
-		self.rss_optional_fields = ["language", "copyright", "managingEditor", "webMaster", "pubDate", "lastBuildDate", "docs", "category", "generator", "docs", "cloud", "ttl", "image", "textInput", "skipHours", "skipDays"]
-		self.rss_field_match_dic = {"webmaster":"webMaster"}
+		self.feed_required_fields = ["title", "link", "description"]
+		self.feed_optional_fields = ["language", "copyright", "managingEditor", "webMaster", "pubDate", "lastBuildDate", "docs", "category", "generator", "docs", "cloud", "ttl", "image", "textInput", "skipHours", "skipDays"]
+		self.feed_field_match_dic = {"webmaster":"webMaster"}
 
 	def getChannelData(self):
 		ch_data = FeedParser.getChannelData(self)
 
 		# 전체 정규 필드값 채우기
-		all_fields = self.rss_required_fields + self.rss_optional_fields
+		all_fields = self.feed_required_fields + self.feed_optional_fields
 		for field in all_fields:
 			if field not in ch_data:
 				ch_data[field] = ""
@@ -240,10 +240,10 @@ class FeedParser(XmlParser):
 				ch_data[field] = ch_data[field].strip()
 
 		# 정규 필드로 매칭이 필요한 경우
-		for match_field in self.rss_field_match_dic.keys():
+		for match_field in self.feed_field_match_dic.keys():
 			if match_field in ch_data:
 				if ch_data[match_field]:
-					ch_data[self.rss_field_match_dic[match_field]] = ch_data[match_field]
+					ch_data[self.feed_field_match_dic[match_field]] = ch_data[match_field]
 
 		return ch_data
 
