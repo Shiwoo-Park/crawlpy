@@ -3,8 +3,8 @@
 
 import MySQLdb
 import MySQLdb.cursors
-from glance.config.db_info import DB_INFO
-from glance.utils.log import getLogger
+from crawl_utils.config.db_info import DB_INFO
+from log import getLogger
 
 
 def getDBConnection(host, usr, pwd, db, cursor_type="normal"):
@@ -65,7 +65,7 @@ def makeWhereClause(dic, keyList=None):
 
 
 def selectCount(dbCursor, tableName, whereDic=None, where="", params=()):
-	if whereDic :
+	if whereDic:
 		where, params = makeWhereClause(whereDic)
 		if len(params) > 0:
 			where = " WHERE "+where
