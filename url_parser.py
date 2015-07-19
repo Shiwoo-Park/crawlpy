@@ -71,8 +71,16 @@ class URLParser:
 
 if __name__ == '__main__':
 	url = "http://news.abc.co.kr/web/game/view.php?a=1&b=2&c=3"
+	url2 = "http://news.efg.co.kr/web/game/view.php?a=11&b=22&c=33"
 	url = "http://(ANYHOST)/web/(BOARD)/view.php?a=(A)&b=(B)&c=3"
 	parser = URLParser()
+
 	url_data = parser.parse(url)
-	url_data["jerk"] = "shit"
+	url_data["age"] = "22"
+
+	url_data2 = parser.parse(url)
+	url_data2["name"] = "shiwoo"
+
+	url_data.update(url_data2)
+
 	print url_data

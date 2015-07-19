@@ -28,6 +28,8 @@ class URLData:
 			"path":self.path, "query_dic":self.query_dic, "data_dic":self.data_dic}
 		return str(d)
 
+	def update(self, update_url_data):
+		self.data_dic.update(update_url_data.data_dic)
 
 class HtmlPageInfo:
 
