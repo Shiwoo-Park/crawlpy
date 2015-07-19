@@ -3,7 +3,7 @@
 
 import MySQLdb
 import MySQLdb.cursors
-from crawl_utils.config.db_info import DB_INFO
+from config.db_info import DB_INFO
 from log import getLogger
 
 

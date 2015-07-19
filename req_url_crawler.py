@@ -16,11 +16,18 @@ request_urls :
 2. 크롤 URL을 LOAD 할 테이블을 지정한다.
 
 < 크롤 URL LOAD 테이블 모델 >
-- idx : primary key
-- request_url : 크롤 요청 url
-- visited : 크롤 여부 Flag (No, Running, Yes)
-- req_time : 요청 시각
-- crawl_time : 크롤 시각
+
+CREATE TABLE `request_urls` (
+	`url_md5` CHAR(32) NOT NULL,
+	`request_url` VARCHAR(1024) NOT NULL,
+	`visited` CHAR(1) NOT NULL DEFAULT 'N',
+	`request_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`crawl_time` TIMESTAMP NULL DEFAULT NULL,
+	`state_msg` VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY (`url_md5`)
+)
+ENGINE=InnoDB
+;
 
 """
 
@@ -28,6 +35,7 @@ import os
 import time
 import sys
 from heapq import heappush, heappop
+from model.common import URLData
 
 from db_util import getDBConnectionByName, selectQuery, executeQuery
 from log import getLogger, Log
@@ -40,22 +48,6 @@ LOG_PATH = "/home/user/logs"
 OUTPUT_PATH = "/home/output/xml"
 CRAWL_DELAY = 3  # sec
 
-class URLData:
-	def __init__(self, id):
-		self.id = id
-		self.data_dic = dict()
-
-	def getID(self):
-		return self.id
-
-	def put(self, k, v):
-		self.data_dic[k] = v
-
-	def get(self,k):
-		if k in self.data_dic:
-			return self.data_dic[k]
-		else:
-			return None
 
 class RequestURLCrawler:
 	def __init__(self, init_dic):
@@ -83,7 +75,7 @@ class RequestURLCrawler:
 		if "request_urls" in input_dic:
 			if input_dic["request_urls"]:
 				return True
-		elif "url_table" in input_dic:
+		elif ("url_table" in input_dic) and ("db_info_key" in input_dic):
 			return True
 
 		return False
@@ -114,7 +106,9 @@ class RequestURLCrawler:
 			self.cursor.close()
 
 	def loadRequestURLs(self, load_count=1000):
-		""" 요청 URL을 일정량만큼 LOAD 한다. """
+
+		""" 요청 URL을 일정량만큼 LOAD 하여 Queue에 채운다. """
+
 		if "request_urls" in input_dic:
 			count = 0
 			while count <= load_count:
@@ -128,7 +122,7 @@ class RequestURLCrawler:
 						heappush(self.req_url_queue, (guid_hash, url_data))
 						count += 1
 		else:
-			query = "SELECT idx, request_url FROM "+self.info_dic["url_table"]+" WHERE visited = 'N' LIMIT %s"%load_count
+			query = "SELECT url_md5, request_url FROM "+self.info_dic["url_table"]+" WHERE visited = 'N' ORDER BY request_time LIMIT %s"%load_count
 			data_list = selectQuery(self.cursor, query, [self.info_dic["domain_id"], "N"])
 			for no, video_url, insert_time in data_list:
 				url_info = self.url_factory.getGuid(video_url)
@@ -140,7 +134,8 @@ class RequestURLCrawler:
 						heappush(self.req_url_queue, (guid_hash, url_data))
 
 	def startCrawl(self):
-		""" queue의 URL을 하나씩 소모하며 컨텐츠 추출 """
+		""" queue의 URL을 하나씩 소모하며 파싱된 최종데이터 추출 """
+
 		count = 0
 		while self.req_url_queue:
 			guid_hash, url_data = heappop(self.req_url_queue)
@@ -148,14 +143,15 @@ class RequestURLCrawler:
 			self.url_data_dic[guid_hash] = url_data
 			count += 1
 			time.sleep(CRAWL_DELAY)
+
 		return count
 
 	def visitURL(self, url_data):
-		"""
-		URL 방문, 파싱하여 URL 데이터 생성
-		"""
+		"""  URL 방문, 파싱하여 URL 데이터 생성 """
+
 		down_url = url_data["url_info"]["down_url"]
 		down_data = downloadPage(down_url)
+
 		if down_data:
 			http_header, http_content, real_URL = down_data
 			parse_result = self.html_parser.parse(http_header, http_content, real_URL)
@@ -166,8 +162,9 @@ class RequestURLCrawler:
 
 	def saveURLData(self):
 		""" 추출한 View URL을 DB 및 File로 출력 """
+
 		# 1. Update flag from load table
-		update_query = "UPDATE "+self.info_dic["url_table"]+" SET flag = 'F' WHERE guid_hash = %s"
+		update_query = "UPDATE "+self.info_dic["url_table"]+" SET visited = 'Y' WHERE url_md5 = %s"
 		save_count = 0
 		document_dic_list = []
 		for guid_hash, url_data in self.url_data_dic.items():
@@ -177,7 +174,7 @@ class RequestURLCrawler:
 				save_count += 1
 				self.logger.info("	Updated URL %s : %s"%(ret, url_data.get("guid")))
 			except Exception, msg:
-				self.logger.error("Update Failed : %s : %s", url_data.get("guid"), msg)
+				self.logger.error("	Update Failed : %s : %s", url_data.get("guid"), msg)
 
 		# 2. Save data into XML file
 		self.xml_producer.printXML(document_dic_list)
@@ -204,6 +201,7 @@ if __name__ == '__main__':
 	input_dic = dict()
 
 	# TABLE 로드 방식
+	input_dic["db_info_key"] = ""  # DB 정보 (config/db_info.py에 입력되어 있어야 함)
 	input_dic["url_table"] = ""  # 크롤할 URL을 불러오고 작업이 끝났을 시, 상태를 갱신할 Table
 
 	# 크롤 URL 직접 지정 방식

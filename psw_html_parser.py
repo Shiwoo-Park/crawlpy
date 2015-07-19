@@ -4,16 +4,19 @@
 import re
 from urlparse import urlparse
 from HTMLParser import HTMLParser
+
 from log import getLogger
-from http_client import downloadPage, getEncoding
-from io_util import saveIntoFile, readFile
-from str_util import guessEncoding
+from http_client import downloadPage
+from io_util import saveIntoFile
+from model.common import HtmlPageInfo
+
 
 def getFinalCharset(charset):
 	charset = charset.lower()
 	if charset in ["ms949", "ks_c_5601-1987"]:
 		return "cp949"
 	return charset
+
 
 class HtmlNode:
 
@@ -48,47 +51,6 @@ class HtmlNode:
 
 		ret = "%s%s  <%s>  %s  %s  %s"%(indent, str(self.depth), self.tag, attr_txt, data_txt, str(self.id))
 		return ret
-
-
-class HtmlPageInfo:
-
-	def __init__(self):
-		self.url = ""
-		self.charset = "utf-8"
-		self.generator = None
-		self.robotDeny = False
-		self.title = None  # default: title 태그 값
-		self.links = dict()  # {href:nodeID, ... }
-		self.imgs = dict()  # {src:nodeID, ...}
-		self.metaInfo = dict()  # key 는 모두 대문자
-		self.dataDic = dict()   # 파싱 최종 결과를 담는 곳
-		# dataDic의 기본 key: title, body_sid, body_eid, regdate
-
-	def setTitle(self, text):
-		self.title = text.decode(self.charset).encode("utf-8")
-
-	def __str__(self):
-		desc_arr = []
-		desc = "URL \t: %s\nCHARSET \t: %s\nGENERATOR \t: %s\nROBOT_DENY \t: %s\nTITLE \t: %s\n\nMETA INFOS"\
-			%(self.url, self.charset, self.generator, self.robotDeny, self.title)
-		desc_arr.append(desc)
-
-		for key, val in self.metaInfo.items():
-			desc_arr.append("\n%s: %s"%(key, val))
-
-		desc_arr.append("\n\nALL LINKS (%s)"%len(self.links))
-		for link, nid in self.links.items():
-			desc_arr.append("\nURL: %s \t(NodeID: %s)"%(link, nid))
-
-		desc_arr.append("\n\nALL IMAGES (%s)"%len(self.imgs))
-		for src, nid in self.imgs.items():
-			desc_arr.append("\nURL: %s \t(NodeID: %s)"%(src, nid))
-
-		desc_arr.append("\n\n##### DATA DIC #####")
-		for key, val in self.dataDic.items():
-			desc_arr.append("\n\nFIELD: %s \nVALUE: %s"%(key, val))
-
-		return ''.join(desc_arr)
 
 
 class PswHtmlParser(HTMLParser):
