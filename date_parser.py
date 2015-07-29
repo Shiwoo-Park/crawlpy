@@ -48,7 +48,7 @@ class DateParser:
 		# - 변환전 문자열 : ';' 로 복수개 지정 가능 (길이가 긴것을 먼저 지정)
 		# - 변환후 문자열 : reserveDic 내부 같은 key값 list의 동일 index value
 		self.trans_word_kvlist.append( ("%p", ["오전","오후"] ) )
-		self.trans_word_kvlist.append( ("%B", ["October;Oct;10월", "November;Nov;11월", "December;Dec;12월", "January;Jan;01월;1월", "February;Feb;02월;2월", "March;Mar;03월;3월", "April;Apr;04월;4월", "May;05월;5월", "June;Jun;06월;6월", "July;Jul;07월;7월", "August;Aug;08월;8월", "September;Sep;09월;9월"] ) )
+		self.trans_word_kvlist.append( ("%B", ["October;october;Oct;10월", "November;november;Nov;11월", "December;december;Dec;12월", "January;january;Jan;01월;1월", "February;february;Feb;02월;2월", "March;march;Mar;03월;3월", "April;april;Apr;04월;4월", "May;05월;5월", "June;Jun;06월;6월", "July;Jul;07월;7월", "August;Aug;08월;8월", "September;september;Sep;09월;9월"] ) )
 		self.trans_word_kvlist.append( ("%A", ["Sunday;Sun;일요일", "Monday;Mon;월요일", "Tuesday;Tue;화요일;화", "Wednesday;Wed;수요일;수", "Thursday;Thu;목요일;목", "Friday;Fri;금요일;금", "Saturday;Sat;토요일;토"] ) )
 
 		# 숫자로의 변환이 필요한 문자열 경우
@@ -283,24 +283,28 @@ class DateParser:
 		if ret_timestamp == 0:
 			ret_timestamp = self.getTimestampByRegexAgoPattern(original_string)
 
+		if ret_timestamp > int(time.time()):
+			if DEBUG:
+				print "Future time : %s(%s)"%(self.getDateByStamp(ret_timestamp), ret_timestamp)
+			ret_timestamp = 0
+
 		return ret_timestamp
 
 	def getBestTimestamp(self, candidate_list):
+		# 각각의 후보에 대해 점수를 매긴다
 		max_score = 0
 		best_timestamp = 0
 		best_date_format = ""
 		for date_format, timestamp in candidate_list:
 			score = 0
-			if "%Y" in date_format:
+			# 날짜에 대한 검사 (반드시 년 > 월 > 일 순차적으로 모두 들어있어야 함.)
+			if ("%Y" in date_format) or ("%y" in date_format):
 				score += 2
 				if ("%m" in date_format) or ("%B" in date_format):
 					score += 1
 					if ("%d" in date_format):
 						score += 2
-			elif ("%m" in date_format) or ("%B" in date_format):
-				score += 1
-				if ("%d" in date_format):
-					score += 1
+			# 시간에 대한 검사 (반드시 시 > 분 > 초 순차적으로 모두 들어있어야 함.)
 			if ("%H" in date_format) or ("%I" in date_format):
 				score += 2
 				if "%p" in date_format:
@@ -309,14 +313,12 @@ class DateParser:
 					score += 1
 					if "%S" in date_format:
 						score += 2
-			elif "%M" in date_format:
-				score += 1
-				if "%S" in date_format:
-					score += 1
+
 			if score > max_score:
 				max_score = score
 				best_timestamp = timestamp
 				best_date_format = date_format
+
 			if DEBUG:
 				print("DATE FORMAT:%s | SCORE:%s"%(date_format, score))
 		return best_timestamp, best_date_format
@@ -452,10 +454,43 @@ class DateParser:
 			if DEEP_DEBUG:
 				print "			TOKEN : %s, CANDI_LIST : %s"%(token, getListStr(candi_list))
 
-		if DEBUG:
-			print ("getFormatList()\n	INPUT LIST : %s\n	CANDIDATE LIST : %s"%(getListStr(normalized_token_list), getListStr(candi_list)) )
+		# 부정확한 후보군 제거
+		# - 날짜 데이터가 2개이하인경우는 모두 탈락
+		# - 년+월, 시+분 일 경우만 통과
+		# - 년도가 월보다 왼쪽, 시간이 분보다 왼쪽에 출현해야함.
+		ret_list = []
+		for d_format, d_str in candi_list:
+			data_count = d_format.count("%")
+			if "%p" in d_format:
+				data_count -= 1
 
-		return candi_list
+			if data_count > 2:
+				ret_list.append((d_format, d_str))
+
+			elif ("%y" in d_format) or ("%Y" in d_format):
+				year_pos = d_format.find("%y")
+				if year_pos < 0:
+					year_pos = d_format.find("%Y")
+				if ("%m" in d_format) or ("%B" in d_format):
+					month_pos = d_format.find("%m")
+					if month_pos < 0:
+						ret_list.append((d_format, d_str))
+					elif year_pos < month_pos:
+						ret_list.append((d_format, d_str))
+
+			elif ("%H" in d_format) or ("%I" in d_format):
+				hour_pos = d_format.find("%y")
+				if hour_pos < 0:
+					hour_pos = d_format.find("%Y")
+				if "%M" in d_format:
+					min_pos = d_format.find("%M")
+					if hour_pos < min_pos:
+						ret_list.append((d_format, d_str))
+
+		if DEBUG:
+			print ("getFormatList()\n	INPUT LIST : %s\n	CANDIDATE LIST : %s"%(getListStr(normalized_token_list), getListStr(ret_list)))
+
+		return ret_list
 
 	# 전체 String 형성을 위한 DateFormat 경우의 수를 만든다.
 
@@ -534,14 +569,15 @@ class DateParser:
 			return time.strftime(self.default_format, time.localtime(int(timestamp)))
 
 if __name__ == "__main__":
-	from resource.date_samples import TIME_AGODATA, TIME_DATEDATA, ASSERT_TIME_DATEDATA
+	from resource_date import TIME_AGODATA, TIME_DATEDATA, ASSERT_TIME_DATEDATA
 
 	set_err = """
+	viernes, junio 12, 2015
 	"""
 
 	d_parser = DateParser()
 
-	ASSERT_MODE = "y"
+	ASSERT_MODE = ""
 
 	if ASSERT_MODE:
 		test_data = ASSERT_TIME_DATEDATA
@@ -569,7 +605,6 @@ if __name__ == "__main__":
 		test_data = TIME_AGODATA
 		test_data = TIME_DATEDATA
 		test_data = set_err
-
 		for time_txt in test_data.split("\n"):
 			if time_txt is None:
 				continue
