@@ -1,8 +1,7 @@
 #!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 
-from parsers.xml_parser import FeedParser, downloadPage
-from utils.str_util import  getDicStr, getListStr
+from parsers.xml_parser import FeedParser
 
 
 class BlogFeedParser(FeedParser):
@@ -64,50 +63,3 @@ class BlogFeedParser(FeedParser):
 		ch_data["generator"] = self.getGenerator(ch_data["generator"].lower())
 		return ch_data
 
-if __name__:
-	rss_links = """
-major
-http://blog.rss.naver.com/anjigagu.xml
-http://enjoiyourlife.com/rss
-http://blog.daum.net/xml/rss/ktg0205
-http://rss.egloos.com/blog/plasmid
-
-Blogger
-http://www.windycitymom.org/feeds/posts/default?alt=rss
-http://www.unodetantosblogs.com/feeds/posts/default?alt=rss
-http://www.coles-corner-and-creations.com/feeds/posts/default?alt=rss
-
-워드프레스
-http://kimcya.com/feed/
-http://null.perl-hackers.net/?feed=rss2
-http://information-plus.net/feed
-
-XE
-http://www.onlifezone.com/rss
-http://underkg.co.kr/rss
-http://my.blogkor.com/textyle/rss
-
-두루팔
-http://www.lifeformula.net/rss.xml
-	"""
-
-	save_path = "C:\Users\jsilva\Desktop\Temp\[SC] blog\\rss\parse_result.txt"
-	file = open(save_path, mode="a")
-	urls = rss_links.split("\n")
-	xml_parser = BlogFeedParser()
-
-	for url in urls:
-		url = url.strip()
-		if not url.startswith("http://"):
-			continue
-		print "Visit : %s"%url
-		file.write("==================== PARSE [%s] ====================\n"%url)
-		downData = downloadPage(url)
-		xml_parser.feed(downData["content"])
-		channel_data = xml_parser.getChannelData()
-		link_data = xml_parser.getLinks()
-		file.write(getDicStr(channel_data))
-		file.write(getListStr(link_data))
-		file.flush()
-		print "	Parsed : %s"%url
-	file.close()

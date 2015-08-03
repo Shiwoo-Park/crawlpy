@@ -25,7 +25,7 @@ if __name__ == '__main__':
 
 		# 모든 정보를 가진 XML URL생성
 		video_info_url = "http://serviceapi.nmv.naver.com/flash/videoInfo.nhn?vid=%s&inKey=%s"%(vid, in_key)
-		print "VISIT : ",video_info_url
+		print "VISIT : ", video_info_url
 		downData = downloadPage(video_info_url)
 		xml_parser = XmlParser(downData["content"])
 		data_dic = xml_parser.getItemDic(is_recursive=True)
@@ -68,9 +68,6 @@ if __name__ == '__main__':
 			for previewTime in previewTimeList:
 				previewJumpurlList.append("http://blog.naver.com/%s?Redirect=Log&logNo=%s&beginTime=%s&jumpingVid=%s"%(ret_dic["blog_id"], ret_dic["post_id"], previewTime, vid))
 			ret_dic["previewJumpurlList"] = "\t".join(previewJumpurlList)
-
-	# 처리 못한 필드 내역
-	# "imageThumbnail80x60", "imageThumbnail130x102", "isCharged", "isHD", "isAdult"
 
 		print "====== XML RESULT ==================================="
 		printDic(data_dic)

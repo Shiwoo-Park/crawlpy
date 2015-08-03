@@ -5,7 +5,7 @@ if __name__ == '__main__':
 	# instantiate the parser and fed it some HTML
 	from utils.http_client import downloadPage
 	from parsers.psw_html_parser import PswHtmlParser
-	from utils.io_util import saveIntoFile
+	from utils.io_util import saveIntoFile, readFile
 
 	parser = PswHtmlParser()
 
@@ -20,7 +20,6 @@ if __name__ == '__main__':
 	targetUrl = "http://blog.daum.net/mudoldol/689"
 	targetUrl = "http://blog.donga.com/lake1379/archives/6558"
 	targetUrl = "http://booklog.kyobobook.co.kr/sonmc/1395492"
-
 	targetUrl = "http://blog.naver.com/PostView.nhn?blogId=ishine75&logNo=220152159716&redirect=Dlog&widgetTypeCall=true"
 	targetUrl = "http://blog.daum.net/adelheimcom/660?t__nil_issue1=txt&nil_id=3"
 	targetUrl = "http://blog.daum.net/_blog/BlogTypeView.do?blogid=0PEaN&articleno=2130"
@@ -30,7 +29,8 @@ if __name__ == '__main__':
 	targetUrl = "http://blog.naver.com/ishine75/220152159716"
 	targetUrl = "http://blog.naver.com/PostView.nhn?blogId=ishine75&logNo=220152159716&redirect=Dlog&widgetTypeCall=true"
 
-	#testHtml = readFile("D:\logs\\test.html")
+	testHtml = ""
+	testHtml = readFile("resources/html_parser_test.html")
 
 	# DOWNLOAD AND PARSE
 	if True:

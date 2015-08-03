@@ -228,7 +228,7 @@ class FeedParser(XmlParser):
 		self.feed_field_match_dic = {"webmaster":"webMaster"}
 
 	def getChannelData(self):
-		ch_data = FeedParser.getChannelData(self)
+		ch_data = XmlParser.getChannelData(self)
 
 		# 전체 정규 필드값 채우기
 		all_fields = self.feed_required_fields + self.feed_optional_fields

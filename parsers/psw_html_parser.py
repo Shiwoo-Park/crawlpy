@@ -5,7 +5,7 @@ import re
 from urlparse import urlparse
 from HTMLParser import HTMLParser
 
-from crawlpy.model.common import HtmlPageInfo
+from model.common import HtmlPageInfo
 
 def getFinalCharset(charset):
 	charset = charset.lower()
