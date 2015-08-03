@@ -103,7 +103,7 @@ class DateParser:
 		# 덩치가 작은 패턴
 		self.pattern_kvlist.append( ("%Y", ["^\s*(\d{4})\s*년\s*$"]) )  # 2014년
 		self.pattern_kvlist.append( ("%Y", ["^\s*(\d{4})\s*"+dd+"\s*$"]) )  # 2014년
-		self.pattern_kvlist.append( ("%m", ["^\s*(\d{1,2})\s*월\s*$"]) )  # 3월, 12월
+		self.pattern_kvlist.append( ("%m", ["^\s*(\d{1,2})\s*월호?\s*$"]) )  # 3월, 12월
 		self.pattern_kvlist.append( ("%d", ["^\s*(\d{1,2})\s*일\s*$"]) )  # 2일, 11일
 		self.pattern_kvlist.append( ("%H", ["^\s*(\d{1,2})\s*시\s*$"]) )  # 2시, 11시
 		self.pattern_kvlist.append( ("%M", ["^\s*(\d{1,2})\s*분\s*$"]) )  # 2분, 41분
@@ -569,15 +569,15 @@ class DateParser:
 			return time.strftime(self.default_format, time.localtime(int(timestamp)))
 
 if __name__ == "__main__":
-	from resource_date import TIME_AGODATA, TIME_DATEDATA, ASSERT_TIME_DATEDATA
+	from resource.date_samples import TIME_AGODATA, TIME_DATEDATA, ASSERT_TIME_DATEDATA
 
 	set_err = """
-	viernes, junio 12, 2015
+
 	"""
 
 	d_parser = DateParser()
 
-	ASSERT_MODE = ""
+	ASSERT_MODE = "t"
 
 	if ASSERT_MODE:
 		test_data = ASSERT_TIME_DATEDATA

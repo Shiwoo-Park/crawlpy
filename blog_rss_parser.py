@@ -1,5 +1,8 @@
-# coding:utf8
-from crawl_utils.xml_parser import FeedParser, downloadPage, getDicStr, getListStr
+#!/usr/bin/python2.7
+# -*- coding: utf-8 -*-
+
+from parsers.xml_parser import FeedParser, downloadPage
+from utils.str_util import  getDicStr, getListStr
 
 
 class BlogFeedParser(FeedParser):

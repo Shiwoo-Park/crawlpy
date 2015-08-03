@@ -3,7 +3,8 @@
 
 import os
 from datetime import datetime
-from log import getLogger
+
+from utils.log import getLogger
 
 """
 Module to make XML file

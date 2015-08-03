@@ -221,7 +221,7 @@ class DataFilter:
 
 # MAIN------------------------------------------------------------------------------ 
 if __name__ == '__main__':
-	from resource.data_samples import WRITER_DATA
+	from parsers.resource import WRITER_DATA
 
 	dataList = WRITER_DATA.split("\n")
 	writerFilter = DataFilter()

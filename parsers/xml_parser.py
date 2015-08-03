@@ -2,10 +2,9 @@
 #coding:utf-8
 
 import re
-import traceback
-import urllib2
 from xml.etree.ElementTree import fromstring
-from str_util import getDicStr, printDic, getListStr
+
+from utils.str_util import printDic
 
 DEBUG = False
 
@@ -249,7 +248,7 @@ class FeedParser(XmlParser):
 
 
 if __name__ == "__main__":
-	from http_client import downloadPage
+	from utils.http_client import downloadPage
 
 	url = "http://www.windycitymom.org/feeds/posts/default?alt=rss"
 	url = "http://serviceapi.nmv.naver.com/flash/videoInfo.nhn?vid=6609703DDBE52161ACBA985614D63D9D88FC&inKey=V121402ebe5d1e8e9a5f3693fc12a4e395eb3ec59c431cf1d01805c0e8209b1141cb5693fc12a4e395eb3"

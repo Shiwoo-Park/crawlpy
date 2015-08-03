@@ -4,7 +4,7 @@
 import MySQLdb
 import MySQLdb.cursors
 from config.db_info import DB_INFO
-from log import getLogger
+from utils.log import getLogger
 
 
 def getDBConnection(host, usr, pwd, db, cursor_type="normal"):

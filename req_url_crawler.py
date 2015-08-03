@@ -35,14 +35,13 @@ import os
 import time
 import sys
 from heapq import heappush, heappop
-from model.common import URLData
 
+from model.common import URLData
 from db_util import getDBConnectionByName, selectQuery, executeQuery
 from log import getLogger, Log
 from hasher import Hasher
 from http_client import downloadPage
-from xml_producer import XMLPrinter
-
+from utils.xml_producer import XMLPrinter
 
 LOG_PATH = "/home/user/logs"
 OUTPUT_PATH = "/home/output/xml"

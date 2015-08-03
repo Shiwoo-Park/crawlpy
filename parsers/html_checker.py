@@ -1,7 +1,7 @@
 #!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 
-from log import getLogger
+from utils.log import getLogger
 from resource.html_patterns import PATTERN_DATA
 
 """
@@ -128,7 +128,7 @@ class HtmlChecker:
 
 if __name__ == "__main__":
 
-	from http_client import downloadPage
+	from utils.http_client import downloadPage
 	import sys
 
 	url = "http://www.brewology.com/?p=2217"

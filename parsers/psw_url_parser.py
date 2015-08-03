@@ -4,9 +4,9 @@
 import traceback
 
 #from db_util import getDBConnectionByName, selectQuery, executeQuery
-from url_parser import URLParser
-from str_util import isNumStr
-from log import getLogger
+from parsers.url_parser import URLParser
+from utils.str_util import isNumStr
+from utils.log import getLogger
 
 DEBUG=True
 
