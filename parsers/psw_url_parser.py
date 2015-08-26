@@ -33,8 +33,6 @@ ENGINE=InnoDB
 ROW_FORMAT=COMPACT
 ;
 
-
-
 1. 기능
 - 숫자 문자열 구분
 - HOST KEY 별 패턴매칭

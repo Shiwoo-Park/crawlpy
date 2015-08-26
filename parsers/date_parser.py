@@ -283,10 +283,12 @@ class DateParser:
 		if ret_timestamp == 0:
 			ret_timestamp = self.getTimestampByRegexAgoPattern(original_string)
 
+		# 미래날짜인 경우 0 처리 ('년월일시분' 정보가 있다면 승인)
 		if ret_timestamp > int(time.time()):
 			if DEBUG:
 				print "Future time : %s(%s)"%(self.getDateByStamp(ret_timestamp), ret_timestamp)
-			ret_timestamp = 0
+			if not self.isValidFutureTime(ret_timestamp):
+				ret_timestamp = 0
 
 		return ret_timestamp
 
@@ -552,6 +554,20 @@ class DateParser:
 
 		return ret
 
+	def isValidFutureTime(self, timestamp):
+		# 년월일시분 정보를 모두 포함하고 있으면 valid
+		time_obj = time.localtime(int(timestamp))
+		if time_obj.tm_min == 0:
+			return False
+		if time_obj.tm_hour == 0:
+			return False
+		if time_obj.tm_mday == 0:
+			return False
+		if time_obj.tm_hour == 0:
+			return False
+		if time_obj.tm_year == 0:
+			return False
+		return True
 
 	# Output functions ===========================================================
 
@@ -572,12 +588,11 @@ if __name__ == "__main__":
 	from resource.date_samples import TIME_AGODATA, TIME_DATEDATA, ASSERT_TIME_DATEDATA
 
 	set_err = """
-
 	"""
 
 	d_parser = DateParser()
 
-	ASSERT_MODE = "t"
+	ASSERT_MODE = "a"
 
 	if ASSERT_MODE:
 		test_data = ASSERT_TIME_DATEDATA
@@ -587,6 +602,8 @@ if __name__ == "__main__":
 				continue
 			line = line.strip()
 			if len(line) == 0:
+				continue
+			if line.startswith("#"):
 				continue
 			tmpList = line.split("	")
 			time_txt = tmpList[0]
