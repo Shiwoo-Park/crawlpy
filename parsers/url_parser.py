@@ -1,6 +1,10 @@
 #!/usr/bin/env python2.7
 # -*- coding:utf-8 -*-
 
+import os
+import sys
+sys.path.append( os.path.dirname(os.path.abspath(os.path.dirname(__file__))) )
+
 from model.common import URLData
 from urlparse import urlparse
 
@@ -26,7 +30,7 @@ class URLParser:
 			url_data.top_domain = top_domain
 
 		url_data.path = url_obj.path
-		url_data.query_dic = self.getQueryDic(url_obj.query)
+		url_data.query_dic = self.__getQueryDic(url_obj.query)
 		return url_data
 
 	def getTopDomain(self, domain):
@@ -60,7 +64,7 @@ class URLParser:
 			else:
 				return ".".join(pieces[-3:])
 
-	def getQueryDic(self, query):
+	def __getQueryDic(self, query):
 		ret = dict()
 		kv_list = query.split("&")
 		for kv in kv_list:
@@ -69,18 +73,50 @@ class URLParser:
 				ret[kv_arr[0]] = kv_arr[1]
 		return ret
 
+	def extract(self, urlpt, url):
+		urlpt_data = self.parse(urlpt)
+		url_data = self.parse(url)
+		return self.extractByData(urlpt_data, url_data)
+
+	def extractByData(self, urlpt_data, url_data):
+		ret_dic = dict()
+		matched = False
+
+		print urlpt_data
+		print url_data
+
+		if self.__compareDomain(urlpt_data.domain, url_data.domain):
+			if self.__comparePath(urlpt_data.path, url_data.path):
+				if self.__compareQuery(urlpt_data.query_dic, url_data.query_dic):
+					matched = True
+		if matched:
+			return ret_dic
+		else:
+			return dict()
+
+	def __compareDomain(self, urlpt_domain, url_domain):
+		pass
+
+	def __comparePath(self, urlpt_path, url_path):
+		pass
+
+	def __compareQuery(self, urlpt_query_dic, url_query_dic):
+		pass
+
 if __name__ == '__main__':
 	url = "http://news.abc.co.kr/web/game/view.php?a=1&b=2&c=3"
 	url2 = "http://news.efg.co.kr/web/game/view.php?a=11&b=22&c=33"
-	url = "http://(ANYHOST)/web/(BOARD)/view.php?a=(A)&b=(B)&c=3"
+	urlpt = "http://(ANYHOST)/web/(BOARD)/view.php?a=(A)&b=(B)&c=3"
 	parser = URLParser()
 
+	"""
 	url_data = parser.parse(url)
 	url_data["age"] = "22"
 
 	url_data2 = parser.parse(url)
 	url_data2["name"] = "shiwoo"
-
 	url_data.update(url_data2)
+	"""
+	url_data = parser.extract(urlpt, url2)
 
 	print url_data
