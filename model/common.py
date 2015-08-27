@@ -8,11 +8,12 @@ class URLData:
 	def __init__(self, url=""):
 		self.original_url = url
 		self.guid = ""
-		self.domain = ""
-		self.top_domain = ""
+		self.org_domain = ""  # host 자체
+		self.domain = ""      # org_domain 에서 www. 제거
+		self.top_domain = ""  # 최상단 도메인 TLD 고려
 		self.path = ""
 		self.query_dic = dict()
-		self.data_dic = dict()
+		self.data_dic = dict()  # 기타 URL 의 관련 데이터가 들어갈 자료구조
 
 	def __setitem__(self, key, value):
 		self.data_dic[key] = value
@@ -24,12 +25,16 @@ class URLData:
 			return None
 
 	def __str__(self):
-		d = {"original_url":self.original_url, "guid":self.guid, "domain":self.domain, "top_domain":self.top_domain,
-			"path":self.path, "query_dic":self.query_dic, "data_dic":self.data_dic}
+		d = {"original_url": self.original_url, "guid": self.guid,
+			"domain": self.domain, "top_domain": self.top_domain, "org_domain": self.org_domain,
+			"path": self.path, "query_dic": self.query_dic, "data_dic": self.data_dic}
 		return str(d)
 
-	def update(self, update_url_data):
-		self.data_dic.update(update_url_data.data_dic)
+	def __cmp__(self, other):
+		if self.guid == other.guid:
+			return True
+		return False
+
 
 class HtmlPageInfo:
 
